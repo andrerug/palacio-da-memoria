@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/gerar-palacio.ts": {
+      "maxDuration": 120
+    }
+  }
+}
