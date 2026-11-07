@@ -133,8 +133,8 @@ export default function Step1({ mode, setMode, loci, setLoci, settings, patch, o
             <div className="card-h">
               <div className="ico"><Type size={20} /></div>
               <div>
-                <h2>2. O que memorizar</h2>
-                <p className="sub">Artigos, súmulas, conceitos. Cada item vira um slide.</p>
+                <h2>2. O que memorizar, em lote</h2>
+                <p className="sub">Cole todos de uma vez: artigos, súmulas, conceitos. Cada item vira um slide.</p>
               </div>
             </div>
             <div className="seg" style={{ marginBottom: 14 }} role="group" aria-label="Separador">
@@ -153,8 +153,8 @@ export default function Step1({ mode, setMode, loci, setLoci, settings, patch, o
             <div className="card-h">
               <div className="ico"><Lightbulb size={20} /></div>
               <div>
-                <h2>3. Ideias de cena <span className="muted" style={{ fontWeight: 500 }}>(opcional)</span></h2>
-                <p className="sub">Uma cena por linha, na mesma ordem dos textos. Em branco, a IA inventa a cena sozinha.</p>
+                <h2>3. Ideias de cena, em lote <span className="muted" style={{ fontWeight: 500 }}>(opcional)</span></h2>
+                <p className="sub">Cole todas de uma vez, igual aos textos: uma ideia por linha, na mesma ordem. A ideia nº 1 vai com o texto nº 1. Linha em branco: a IA cria a cena sozinha.</p>
               </div>
             </div>
             <textarea
