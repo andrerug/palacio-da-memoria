@@ -62,6 +62,16 @@ export default function Step3({ mode, pairs, settings, running, onBack, onRetry,
           </div>
         </div>
 
+        {mode === 'montar' && (
+          <div className="note warn" role="status">
+            <TriangleAlert size={20} style={{ flex: 'none' }} />
+            <div>
+              <b>Modo "Só montar o PDF": nenhuma imagem foi gerada.</b>{' '}
+              Os slides usam as suas fotos como estão. Para a IA desenhar as cenas, volte ao passo 1 e escolha "Gerar as cenas com IA".
+            </div>
+          </div>
+        )}
+
         {!running && err.length > 0 && (
           <div className="note warn">
             <TriangleAlert size={20} style={{ flex: 'none' }} />

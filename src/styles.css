@@ -253,3 +253,17 @@ textarea:focus-visible, input:focus-visible, select:focus-visible{outline:3px so
 @media (prefers-reduced-motion: reduce){ .skeleton, .spin, .fade{animation:none !important} }
 @media (max-width:700px){ .sair-txt{display:none} }
 @media (max-width:480px){ .wrap{padding:0 16px} .top-in{gap:8px} .brand b{display:none} .stepper .st{padding:6px 6px} .stepper .sep{width:6px} }
+
+/* ---------- escolha de modo (passo 1) ---------- */
+.modos{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+@media (max-width:700px){ .modos{grid-template-columns:1fr} }
+.modo{display:flex; gap:14px; align-items:flex-start; text-align:left; padding:18px; border-radius:var(--r);
+  border:2px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; font:inherit; min-height:44px}
+.modo:hover{border-color:var(--line-strong)}
+.modo b{display:block; font-size:17px; font-weight:800; margin-bottom:4px; font-variation-settings:"wdth" 92}
+.modo span span{display:block; font-size:15px; color:var(--ink-2); line-height:1.45}
+.modo-marca{width:22px; height:22px; border-radius:50%; border:2px solid var(--line-strong); flex:none; margin-top:2px; display:grid; place-items:center}
+.modo[aria-checked=true]{border-color:var(--accent); background:var(--accent-soft)}
+.modo[aria-checked=true] .modo-marca{border-color:var(--accent); background:var(--accent)}
+.modo[aria-checked=true] .modo-marca::after{content:""; width:8px; height:8px; border-radius:50%; background:var(--on-accent)}
+.modo:focus-visible{outline:3px solid var(--av-foco-anel); outline-offset:2px; box-shadow:0 0 0 5px var(--av-foco-halo)}

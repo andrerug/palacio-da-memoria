@@ -63,9 +63,21 @@ export default function Step1({ mode, setMode, loci, setLoci, settings, patch, o
           <p className="sub">Fotos de lugares que você conhece de cor + o que precisa memorizar. O resto é automático.</p>
         </div>
 
-        <div className="seg" role="group" aria-label="Modo">
-          <button aria-pressed={gerar} onClick={() => setMode('gerar')}>Gerar imagens com IA</button>
-          <button aria-pressed={!gerar} onClick={() => setMode('montar')}>Já tenho as imagens: só montar o PDF</button>
+        <div className="modos" role="radiogroup" aria-label="O que você quer fazer">
+          <button type="button" role="radio" aria-checked={gerar} className="modo" onClick={() => setMode('gerar')}>
+            <span className="modo-marca" aria-hidden="true" />
+            <span>
+              <b>Gerar as cenas com IA</b>
+              <span>Você envia as fotos dos seus cômodos e a IA desenha uma cena absurda em cada uma.</span>
+            </span>
+          </button>
+          <button type="button" role="radio" aria-checked={!gerar} className="modo" onClick={() => setMode('montar')}>
+            <span className="modo-marca" aria-hidden="true" />
+            <span>
+              <b>Só montar o PDF</b>
+              <span>Você já tem as imagens prontas. Nada é gerado: cada imagem vira um slide com o texto.</span>
+            </span>
+          </button>
         </div>
 
         <div className="card">
