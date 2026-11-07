@@ -4,12 +4,15 @@
 
 import { createHash, timingSafeEqual } from "node:crypto";
 
-const MODELO_PADRAO = process.env.MODELO_IMAGEM || "gemini-3.1-flash-image";
-const MODELO_RESERVA = "gemini-2.5-flash-image";
+// Pro (Nano Banana Pro): o mais preciso para editar foto real mantendo o ambiente. Reserva: Flash novo.
+const MODELO_PADRAO = process.env.MODELO_IMAGEM || "gemini-3-pro-image";
+const MODELO_RESERVA = "gemini-3.1-flash-image";
+const TAMANHO = "2K"; // no Pro, 2K custa o mesmo que 1K
 const MAX_CORPO = 4_000_000; // bytes (limite de pedido das funções da Vercel é 4,5 MB)
 const MAX_RESPOSTA = 4_200_000; // bytes
 const MAX_PROMPT = 12_000;
 const MIMES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const PROPORCOES = new Set(["21:9", "16:9", "3:2", "4:3", "5:4", "1:1", "4:5", "3:4", "2:3", "9:16"]);
 
 function json(status: number, corpo: Record<string, unknown>): Response {
   return new Response(JSON.stringify(corpo), {
@@ -52,22 +55,34 @@ export async function POST(request: Request): Promise<Response> {
   if (!prompt || prompt.length > MAX_PROMPT) return erro(400, "ENTRADA", "Descrição vazia ou longa demais.");
   if (!loci) return erro(400, "ENTRADA", "Foto do lugar inválida.");
   if (dados?.ref && !ref) return erro(400, "ENTRADA", "Foto do personagem inválida.");
+  const proporcao = PROPORCOES.has(String(dados?.aspectRatio)) ? String(dados.aspectRatio) : null;
   if (loci.data.length + (ref?.data.length || 0) > MAX_CORPO) return erro(413, "ENTRADA", "Fotos grandes demais. Use imagens menores.");
 
   const partes: any[] = [{ inline_data: { mime_type: loci.mimeType, data: loci.data } }];
   if (ref) partes.push({ inline_data: { mime_type: ref.mimeType, data: ref.data } });
   partes.push({ text: prompt });
 
-  const chamar = (modelo: string) =>
+  const chamar = (modelo: string, comFormato = true) =>
     fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelo)}:generateContent`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": chave },
-      body: JSON.stringify({ contents: [{ role: "user", parts: partes }] }),
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: partes }],
+        generationConfig: { imageConfig: { imageSize: TAMANHO, ...(proporcao && comFormato ? { aspectRatio: proporcao } : {}) } },
+      }),
     });
 
   try {
     let res = await chamar(MODELO_PADRAO);
     if (res.status === 404 && MODELO_PADRAO !== MODELO_RESERVA) res = await chamar(MODELO_RESERVA);
+    // Se o modelo recusar a proporção, tenta sem ela (o navegador recorta no formato da foto depois).
+    if (res.status === 400 && proporcao) {
+      // Só tenta sem a proporção se o erro for justamente sobre ela.
+      const corpoErro = await res.clone().text();
+      if (/aspect|image_config|imageConfig/i.test(corpoErro)) {
+        res = await chamar(res.url.includes(MODELO_RESERVA) ? MODELO_RESERVA : MODELO_PADRAO, false);
+      }
+    }
 
     if (!res.ok) {
       let detalhe = "";

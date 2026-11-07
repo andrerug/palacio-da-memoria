@@ -1,13 +1,13 @@
 import { Pair, Settings, StyleKey } from '../types';
 
 export const STYLES: Record<StyleKey, { label: string; hint: string }> = {
-  foto:   { label: 'Fotorrealista',        hint: 'Mantenha aparência de fotografia real, luz e textura coerentes com a foto original.' },
-  ilus:   { label: 'Ilustração vibrante',  hint: 'Transforme a cena em ilustração digital vibrante, cores saturadas e contornos nítidos, mantendo o enquadramento.' },
-  cartum: { label: 'Cartum exagerado',     hint: 'Use estética de cartum exagerado, proporções absurdas e expressões cômicas, mantendo o enquadramento.' },
-  noir:   { label: 'Sombrio dramático',    hint: 'Use clima sombrio e dramático, contraste alto e névoa, mantendo o enquadramento.' },
+  foto:   { label: 'Fotorrealista',        hint: 'ESTILO DO QUE FOR ACRESCENTADO: fotorrealista, com a mesma luz, sombra, granulação e nitidez da foto original, como se tivesse sido fotografado ali.' },
+  ilus:   { label: 'Ilustração vibrante',  hint: 'ESTILO DO QUE FOR ACRESCENTADO: só o protagonista e os detalhes em ilustração digital vibrante, cores saturadas e contornos nítidos. O ambiente continua sendo a foto original, sem nenhum filtro.' },
+  cartum: { label: 'Cartum exagerado',     hint: 'ESTILO DO QUE FOR ACRESCENTADO: só o protagonista em estética de cartum exagerado, proporções absurdas e expressão cômica. O ambiente continua sendo a foto original, sem nenhum filtro.' },
+  noir:   { label: 'Sombrio dramático',    hint: 'ESTILO DO QUE FOR ACRESCENTADO: só o protagonista com aparência sombria e dramática, expressão intensa e roupas escuras. Não escureça, não enevoe e não mude a luz do ambiente: ele continua sendo a foto original.' },
 };
 
-export const DEFAULT_MODEL = 'gemini-3.1-flash-image';
+export const DEFAULT_MODEL = 'gemini-3-pro-image';
 
 /** A chave do Gemini fica só no servidor (api/gerar-palacio.ts). */
 export const injectedKey = '';
@@ -17,6 +17,10 @@ export const injectedKey = '';
 const REGRA_UMA_CENA =
 `REGRA DE OURO — UMA CENA SÓ, NUNCA UMA COLAGEM:
 • Insira UM único protagonista (uma figura, criatura ou objeto) executando UMA ação clara, em UM ponto do ambiente.
+• O protagonista está SEMPRE EM AÇÃO, no meio do movimento: puxando, empurrando, derramando, arrombando, equilibrando,
+  correndo, lacrando, gritando. Nunca só parado, posando, sorrindo para a câmera ou segurando algo sem fazer nada.
+• A ação envolve um móvel ou objeto específico do cômodo (a pia, a porta do armário, a geladeira) e, sempre que der,
+  representa o verbo do comando da lei (deverá, poderá, é vedado, obedecerá).
 • No máximo 2 detalhes de apoio, e apenas se cada um codificar uma palavra-chave específica do texto.
 • É proibido: espalhar objetos pelo cômodo, repetir o mesmo símbolo em vários lugares, encher a cena de elementos
   decorativos, criar várias mini-cenas na mesma imagem. Menos elementos e mais absurdo é sempre melhor.
@@ -35,9 +39,21 @@ const REGRA_ANCORA =
    texto. Não invente nenhum elemento que não corresponda a algo do texto.`;
 
 const REGRA_AMBIENTE =
-`PRESERVE O AMBIENTE: mantenha rigorosamente a estrutura, o enquadramento, a perspectiva, os móveis e a iluminação da
-foto original. A familiaridade com o local é o que faz a técnica funcionar. O protagonista interage fisicamente com o
-cenário real (apoiado, encostado, projetando sombra no lugar certo), como se sempre tivesse estado ali.`;
+`REGRA MAIS IMPORTANTE: O FUNDO É INTOCÁVEL.
+A foto enviada é um cômodo real que a pessoa conhece de cor. É esse cenário conhecido que faz a memorização funcionar,
+então ele tem que voltar IDÊNTICO.
+• Mantenha exatamente: paredes, azulejos, piso, teto, móveis, eletrodomésticos, objetos, cores, texturas, posições,
+  iluminação, sombras, perspectiva, ângulo da câmera e enquadramento.
+• Não remova, não troque, não mova, não limpe, não arrume, não redesenhe, não estilize e não aplique filtro em nada
+  do ambiente. Nenhum objeto da foto pode sumir ou mudar de lugar.
+• Você só ACRESCENTA: o protagonista e, no máximo, 2 detalhes de apoio. Eles entram no cenário real, apoiados, encostados
+  ou interagindo com um móvel, com sombra coerente com a luz que já existe na foto.
+• Formato: a imagem final tem no mínimo a mesma proporção e a mesma orientação da foto enviada (foto horizontal volta
+  horizontal; vertical volta vertical). Não recorte, não gire e não amplie o ambiente.`;
+
+const REGRA_FICTICIO =
+`PERSONAGEM FICTÍCIO: o protagonista é sempre uma figura inventada. Nunca retrate pessoas reais, famosas ou públicas
+(juízes, políticos, artistas), nem rostos parecidos com elas. Profissões e cargos aparecem pelo uniforme e pelos objetos.`;
 
 export function buildPrompt(pair: Pair, s: Settings): string {
   const style = STYLES[s.style]?.hint || '';
@@ -51,12 +67,14 @@ export function buildPrompt(pair: Pair, s: Settings): string {
     ? 'A segunda imagem enviada é o protagonista da cena: use aquele personagem/objeto como figura central, e nenhuma outra.'
     : '';
   return [
-    'TAREFA: editar esta foto de um ambiente real para criar UMA ÚNICA imagem-gatilho de memorização.',
+    'TAREFA: acrescentar UMA cena-gatilho de memorização a esta foto de um ambiente real, sem alterar o ambiente.',
+    REGRA_AMBIENTE,
     REGRA_UMA_CENA,
     REGRA_ANCORA,
-    REGRA_AMBIENTE,
+    REGRA_FICTICIO,
     `TEXTO A MEMORIZAR (letra fria da lei):\n"${pair.text}"`,
     idea, ref, style, noText,
+    'LEMBRETE FINAL: o cômodo da foto volta exatamente como estava, e o protagonista aparece fazendo uma ação, não posando. A única mudança permitida é o que você acrescentou.',
   ].filter(Boolean).join('\n\n');
 }
 
@@ -68,33 +86,51 @@ export const getSenha = (): string => { try { return localStorage.getItem(CHAVE_
 export const setSenha = (v: string) => { try { localStorage.setItem(CHAVE_SENHA, v); } catch { /* sem armazenamento */ } };
 export const limparSenha = () => { try { localStorage.removeItem(CHAVE_SENHA); } catch { /* idem */ } };
 
-/** Reduz a foto no navegador (lado maior 1536 px, JPEG) para caber no limite do servidor. */
-async function reduzir(file: File, lado = 1536): Promise<{ mimeType: string; data: string }> {
+/** Reduz a foto no navegador (lado maior 1536 px, JPEG) para caber no limite do servidor.
+    Devolve também largura e altura, para a resposta voltar no mesmo formato. */
+async function reduzir(file: File, lado = 1536): Promise<{ mimeType: string; data: string; w: number; h: number }> {
   const url = URL.createObjectURL(file);
   try {
-    const img = await new Promise<HTMLImageElement>((ok, falha) => {
-      const i = new Image();
-      i.onload = () => ok(i);
-      i.onerror = () => falha(new Error('Não foi possível ler uma das fotos.'));
-      i.src = url;
-    });
+    const img = await carregar(url);
     const escala = Math.min(1, lado / Math.max(img.naturalWidth, img.naturalHeight));
     const c = document.createElement('canvas');
     c.width = Math.round(img.naturalWidth * escala);
     c.height = Math.round(img.naturalHeight * escala);
     c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
-    return { mimeType: 'image/jpeg', data: c.toDataURL('image/jpeg', 0.86).split(',')[1] };
+    return { mimeType: 'image/jpeg', data: c.toDataURL('image/jpeg', 0.86).split(',')[1], w: c.width, h: c.height };
   } finally {
     URL.revokeObjectURL(url);
   }
 }
 
+function carregar(src: string): Promise<HTMLImageElement> {
+  return new Promise((ok, falha) => {
+    const i = new Image();
+    i.onload = () => ok(i);
+    i.onerror = () => falha(new Error('Não foi possível ler uma das fotos.'));
+    i.src = src;
+  });
+}
+
+/** Proporções que o modelo de imagem aceita. Escolhe a mais próxima da foto. */
+const PROPORCOES: [string, number][] = [
+  ['21:9', 21 / 9], ['16:9', 16 / 9], ['3:2', 3 / 2], ['4:3', 4 / 3], ['5:4', 5 / 4], ['1:1', 1],
+  ['4:5', 4 / 5], ['3:4', 3 / 4], ['2:3', 2 / 3], ['9:16', 9 / 16],
+];
+export function proporcaoMaisProxima(w: number, h: number): string {
+  const r = w / h;
+  return PROPORCOES.reduce((melhor, p) => (Math.abs(Math.log(p[1] / r)) < Math.abs(Math.log(melhor[1] / r)) ? p : melhor))[0];
+}
+
 /** Pede a cena ao servidor (que confere a senha e chama o Gemini) e devolve um data: URL. */
 export async function generateMemoryImage(pair: Pair, s: Settings): Promise<string> {
+  const loci = await reduzir(pair.loci.file);
+  const ref = pair.ref ? await reduzir(pair.ref.file, 1024) : undefined;
   const corpo = {
     prompt: buildPrompt(pair, s),
-    loci: await reduzir(pair.loci.file),
-    ref: pair.ref ? await reduzir(pair.ref.file, 1024) : undefined,
+    loci: { mimeType: loci.mimeType, data: loci.data },
+    ref: ref ? { mimeType: ref.mimeType, data: ref.data } : undefined,
+    aspectRatio: proporcaoMaisProxima(loci.w, loci.h),
   };
 
   let res: Response;

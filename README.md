@@ -40,7 +40,7 @@ tipografia grande, sem serifa e sem texto cortado.
 | --- | --- |
 | `GEMINI_API_KEY` | Chave do Google AI Studio, de projeto com faturamento ativo |
 | `SENHA_APP` | Senha de acesso que você escolher |
-| `MODELO_IMAGEM` | Opcional. Padrão `gemini-3.1-flash-image`; se der 404, o servidor tenta `gemini-2.5-flash-image` |
+| `MODELO_IMAGEM` | Opcional. Padrão `gemini-3-pro-image` (Nano Banana Pro, 2K, cerca de US$ 0,134 por imagem); se der 404, o servidor usa `gemini-3.1-flash-image` |
 
 Depois de mudar uma variável, faça um novo deploy.
 
