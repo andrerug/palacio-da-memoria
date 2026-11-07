@@ -267,3 +267,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible{outline:3px so
 .modo[aria-checked=true] .modo-marca{border-color:var(--accent); background:var(--accent)}
 .modo[aria-checked=true] .modo-marca::after{content:""; width:8px; height:8px; border-radius:50%; background:var(--on-accent)}
 .modo:focus-visible{outline:3px solid var(--av-foco-anel); outline-offset:2px; box-shadow:0 0 0 5px var(--av-foco-halo)}
+
+/* ---------- estimativa de custo ---------- */
+.custo{font-size:15px; font-weight:600; color:var(--ink-2); font-variant-numeric:tabular-nums; white-space:nowrap; cursor:help}
+.custo-mini{font-size:13px; font-weight:600; color:var(--ink-2); font-variant-numeric:tabular-nums}

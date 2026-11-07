@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { Mode, Pair, Settings } from '../types';
 import { exportPdf, exportZip, readyPairs } from '../lib/export';
+import { PRECO_POR_IMAGEM_USD, textoCusto } from '../lib/custo';
 
 interface Props {
   mode: Mode;
@@ -91,7 +92,7 @@ export default function Step3({ mode, pairs, settings, running, onBack, onRetry,
                 <span className="spacer" style={{ marginLeft: 'auto' }} />
                 {mode === 'gerar' && (
                   <button className="btn quiet sm" disabled={running} onClick={() => onRetry([p.id])}>
-                    <RotateCw size={15} /> Refazer
+                    <RotateCw size={15} /> Refazer <span className="custo-mini">{textoCusto(1, PRECO_POR_IMAGEM_USD).curto}</span>
                   </button>
                 )}
               </div>
@@ -125,6 +126,7 @@ export default function Step3({ mode, pairs, settings, running, onBack, onRetry,
           {!running && err.length > 0 && (
             <button className="btn ghost" onClick={() => onRetry(err.map((p) => p.id))}>
               <RotateCw size={16} /> Refazer os que falharam
+              <span className="custo-mini">{textoCusto(err.length, PRECO_POR_IMAGEM_USD).curto}</span>
             </button>
           )}
           <span className="spacer" />

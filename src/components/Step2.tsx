@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, GripHorizontal, Lightbulb, Plus, Trash2 } from '
 import { Mode, Pair, Settings, TextBand } from '../types';
 import { STYLES } from '../lib/gemini';
 import { uid } from '../lib/utils';
+import { PRECO_POR_IMAGEM_USD, textoCusto } from '../lib/custo';
 
 interface Props {
   mode: Mode;
@@ -183,6 +184,11 @@ export default function Step2({ mode, pairs, setPairs, settings, patch, onBack, 
           <button className="btn ghost" onClick={onBack}><ArrowLeft size={18} /> Voltar</button>
           <span className="pill accent">{pairs.length} par(es)</span>
           <span className="spacer" />
+          {!montar && pairs.length > 0 && (
+            <span className="custo" title={textoCusto(pairs.length, PRECO_POR_IMAGEM_USD).detalhe}>
+              {textoCusto(pairs.length, PRECO_POR_IMAGEM_USD).curto}
+            </span>
+          )}
           <button className="btn" disabled={!pairs.length} onClick={onRun}>
             {montar ? 'Montar deck' : 'Gerar imagens'} <ArrowRight size={18} />
           </button>
